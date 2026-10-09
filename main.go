@@ -1,21 +1,22 @@
 package main
 
 import (
-	"maxbell/dao/mysql"
-	"maxbell/dao/redis"
-	"maxbell/logger"
-	"maxbell/routes"
-	"maxbell/settings"
 	"context"
 	"fmt"
 	"log"
+	"maxbell/dao/mysql"
+	"maxbell/dao/redis"
+	"maxbell/logger"
+	"maxbell/pkg/snowflake"
+	"maxbell/routes"
+	"maxbell/settings"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"github.com/spf13/viper"
+	//"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
 
@@ -44,11 +45,16 @@ func main() {
 		return
 	}
 	defer redis.Close()
+
+	if err := snowflake.Init(settings.Conf.StartTime, settings.Conf.MachineID); err != nil {
+		fmt.Printf("snowflake init failed err:%v\n", err)
+	}
+
 	//5.注册路由
 	r := routes.Setup()
 	//6.启动服务（优雅关机）
 	srv := &http.Server{
-		Addr:    fmt.Sprintf("%d", viper.GetInt("app.port")),
+		Addr:    fmt.Sprintf(":%d", settings.Conf.Port),
 		Handler: r,
 	}
 

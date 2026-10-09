@@ -1,7 +1,9 @@
-app:
-  name: "maxbell"
-  mode: "dev"
-  port: 8081
+
+name: "maxbell"
+mode: "dev"
+port: 8081
+start_time: "2026-10-09"
+mechine_id: 1
 
 log:
   level: "debug"
@@ -14,8 +16,8 @@ mysql:
   host: "127.0.0.1"
   port: 13306
   user: "root"
-  password: "123456"
-  dbname: "sql_demo"
+  password: "1111"
+  dbname: "maxbell"
   maxopenconns: 200
   maxidleconns: 50
 

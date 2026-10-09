@@ -1,13 +1,12 @@
-package main
+package snowflake
 
 import (
-	"fmt"
 	"time"
 
-	"github.com/bwmarrin/snowflake"
+	 sf "github.com/bwmarrin/snowflake"
 )
 
-var node *snowflake.Node
+var node *sf.Node
 
 func Init(startTime string, machineID int64) (err error) {
 	var st time.Time
@@ -15,18 +14,12 @@ func Init(startTime string, machineID int64) (err error) {
 	if err != nil {
 		return
 	}
-	snowflake.Epoch = st.UnixNano() / 1000000
-	node, err = snowflake.NewNode(machineID)
+	sf.Epoch = st.UnixNano() / 1000000
+	node, err = sf.NewNode(machineID)
 	return
 }
 func GenID() int64 {
 	return node.Generate().Int64()
 }
-func main() {
-	if err := Init("2020-07-01", 1); err != nil {
-		fmt.Printf("init failed, err:%v\n", err)
-		return
-	}
-	id := GenID()
-	fmt.Println(id)
-}
+
+
