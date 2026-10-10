@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"maxbell/controllers"
 	"maxbell/dao/mysql"
 	"maxbell/dao/redis"
 	"maxbell/logger"
@@ -48,6 +49,12 @@ func main() {
 
 	if err := snowflake.Init(settings.Conf.StartTime, settings.Conf.MachineID); err != nil {
 		fmt.Printf("snowflake init failed err:%v\n", err)
+	}
+
+	//初始化gin框架内置的校验器使用的翻译器
+	if err:= controllers.InitTrans("zh"); err!= nil{
+		fmt.Printf("init validator trans failed, err:%v\n", err)
+		return
 	}
 
 	//5.注册路由
