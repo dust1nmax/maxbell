@@ -4,15 +4,23 @@ import (
 	"maxbell/dao/mysql"
 	"maxbell/models"
 	"maxbell/pkg/snowflake"
+
 )
 
-func SignUp(p *models.ParamSignup){
+func SignUp(p *models.ParamSignup) (err error) {
 	//判读用户是否存在
-	mysql.QueryUserbyusername()
+	if err = mysql.QueryUserbyusername(p.Username);err != nil {
+		return err
+	}
 	//生成uid
-	snowflake.GenID()
-	//密码加密
+	userId := snowflake.GenID()
+	//构造user 实例
+	user := models.User{
+		Userid: userId,
+		Username: p.Username,
+		Password: p.Password,
+	}
 
 	//存进数据库
-	mysql.InsertUser()
+	return mysql.InsertUser(&user)
 }
