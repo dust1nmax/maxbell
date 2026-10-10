@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"crypto/md5"
+	"database/sql"
 	"encoding/hex"
 	"errors"
 	"maxbell/models"
@@ -14,12 +15,12 @@ func QueryUserbyusername(username string) (err error) {
 	sqlstr := `select count(user_id) from user where username = ?`
 	var count int
 	if err := db.Get(&count, sqlstr, username); err != nil {
-		return  err
+		return err
 	}
 	if count > 0 {
 		return errors.New("用户已存在")
 	}
-	return 
+	return
 }
 
 func InsertUser(user *models.User) (err error) {
@@ -35,4 +36,21 @@ func encryptPassword(opassword string) string {
 	h := md5.New()
 	h.Write([]byte(secret))
 	return hex.EncodeToString(h.Sum([]byte(opassword)))
+}
+
+func Login(user *models.User) (err error) {
+	opassword := user.Password
+	sqlstr := `select user_id, username, password from user where username = ?`
+	err = db.Get(user, sqlstr, user.Username)
+	if err == sql.ErrNoRows {
+		return errors.New("用户不存在")
+	}
+	if err != nil {
+		return nil 
+	}
+	password := encryptPassword(opassword)
+	if password != user.Password {
+		return errors.New("密码错误")
+	}
+	return
 }
