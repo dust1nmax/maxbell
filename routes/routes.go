@@ -8,7 +8,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Setup() *gin.Engine {
+func Setup(mode string) *gin.Engine {
+	//gin.SetMode(gin.ReleaseMode) //设置为发布模式
+	if mode == gin.ReleaseMode {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	r := gin.New()
 	r.Use(logger.Ginlogger(), logger.GinRecovery(true))
 

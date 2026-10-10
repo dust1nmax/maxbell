@@ -19,23 +19,35 @@ import (
 
 var logger *zap.Logger
 var sugarLogger *zap.SugaredLogger
- 
-func Init(cfg *settings.LogConfig) (err error) {
+
+func Init(cfg *settings.LogConfig, mode string) (err error) {
 	writeSyncer := getLogWriter(
-		cfg.FileName, 
-		cfg.Max_size, 
-		cfg.Max_backups, 
+		cfg.FileName,
+		cfg.Max_size,
+		cfg.Max_backups,
 		cfg.Max_age)
 	encoder := getEncoder()
 	var l = new(zapcore.Level)
 	err = l.UnmarshalText([]byte(viper.GetString("log.level")))
-	if err != nil{
+	if err != nil {
 		return
 	}
-	core := zapcore.NewCore(encoder, writeSyncer, l)
+	var core zapcore.Core
+	if mode == "dev" {
+		// 进入开发模式， 日志输出到终端
+		consoleEnbcoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
+		core = zapcore.NewTee(
+			// 和正常一些写在日志里
+			zapcore.NewCore(encoder, writeSyncer, l),
+			// 输出在终端
+			zapcore.NewCore(consoleEnbcoder, zapcore.Lock(os.Stdout), zapcore.DebugLevel,),
+		)
+	} else {
+		core = zapcore.NewCore(encoder, writeSyncer, l)
+	}
 
 	lg := zap.New(core, zap.AddCaller())
-	
+
 	zap.ReplaceGlobals(lg)
 	return
 }
@@ -43,7 +55,7 @@ func Init(cfg *settings.LogConfig) (err error) {
 // 编码器(如何写入日志)
 func getEncoder() zapcore.Encoder {
 	//更改时间编码
-	encoderConfig  := zap.NewProductionEncoderConfig()
+	encoderConfig := zap.NewProductionEncoderConfig()
 	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	encoderConfig.TimeKey = "time"
 	encoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
@@ -63,13 +75,13 @@ func getEncoder() zapcore.Encoder {
 
 // 使用Lumberjack进行日志切割归档
 // 添加日志切割归档功能
-func getLogWriter(filename string, maxsize, maxbackups, maxage int ) zapcore.WriteSyncer {
+func getLogWriter(filename string, maxsize, maxbackups, maxage int) zapcore.WriteSyncer {
 	lumberjackLogger := &lumberjack.Logger{
 		Filename:   filename,
-		MaxSize:    maxsize, //容量 MB
-		MaxBackups: maxbackups,   //最大备份数量
-		MaxAge:     maxage,  //最大备份天数
-		Compress:   false, 
+		MaxSize:    maxsize,    //容量 MB
+		MaxBackups: maxbackups, //最大备份数量
+		MaxAge:     maxage,     //最大备份天数
+		Compress:   false,
 	}
 	return zapcore.AddSync(lumberjackLogger)
 }
@@ -77,23 +89,23 @@ func getLogWriter(filename string, maxsize, maxbackups, maxage int ) zapcore.Wri
 // Ginlogger 接受gin框架默认的日志
 func Ginlogger() gin.HandlerFunc {
 	return func(c *gin.Context) {
-			start := time.Now()
-			path := c.Request.URL.Path
-			query := c.Request.URL.RawQuery
-			c.Next()
+		start := time.Now()
+		path := c.Request.URL.Path
+		query := c.Request.URL.RawQuery
+		c.Next()
 
-			cost := time.Since(start)
-			zap.L().Info(path,
-				zap.Int("Status", c.Writer.Status()),
-				zap.String("method", c.Request.Method),
-				zap.String("path", path),
-				zap.String("query", query),
-				zap.String("ip", c.ClientIP()),
-				zap.String("user-agent", c.Request.UserAgent()),
-				zap.String("errors", c.Errors.ByType(gin.ErrorTypePrivate).String()),
-				zap.Duration("cost", cost),
-			)
-		}
+		cost := time.Since(start)
+		zap.L().Info(path,
+			zap.Int("Status", c.Writer.Status()),
+			zap.String("method", c.Request.Method),
+			zap.String("path", path),
+			zap.String("query", query),
+			zap.String("ip", c.ClientIP()),
+			zap.String("user-agent", c.Request.UserAgent()),
+			zap.String("errors", c.Errors.ByType(gin.ErrorTypePrivate).String()),
+			zap.Duration("cost", cost),
+		)
+	}
 }
 
 // GinRecovery recover掉项目可能出现的panic
@@ -142,4 +154,3 @@ func GinRecovery(stack bool) gin.HandlerFunc {
 		c.Next()
 	}
 }
-
