@@ -9,6 +9,11 @@ import (
 )
 
 var secret = "max"
+var (
+	ErrorUserExist = errors.New("用户已存在")
+	ErrorUserNotExist = errors.New("用户不存在")
+	ErrorInvalidParams = errors.New("密码错误")
+)
 
 // 把每一步数据库操作封装成函数等到logic 层调用
 func QueryUserbyusername(username string) (err error) {
@@ -18,7 +23,7 @@ func QueryUserbyusername(username string) (err error) {
 		return err
 	}
 	if count > 0 {
-		return errors.New("用户已存在")
+		return ErrorUserExist
 	}
 	return
 }
@@ -43,14 +48,14 @@ func Login(user *models.User) (err error) {
 	sqlstr := `select user_id, username, password from user where username = ?`
 	err = db.Get(user, sqlstr, user.Username)
 	if err == sql.ErrNoRows {
-		return errors.New("用户不存在")
+		return ErrorUserNotExist
 	}
 	if err != nil {
-		return nil 
+		return nil
 	}
 	password := encryptPassword(opassword)
 	if password != user.Password {
-		return errors.New("密码错误")
+		return ErrorInvalidParams
 	}
 	return
 }

@@ -1,10 +1,11 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
+	"maxbell/dao/mysql"
 	"maxbell/logic"
 	"maxbell/models"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -21,14 +22,10 @@ func SignUpHandler(c *gin.Context) {
 		//判断err是不是validator.ValidationErrors类型
 		errs, ok := err.(validator.ValidationErrors)
 		if !ok {
-			c.JSON(http.StatusOK, gin.H{
-				"msg": "请求参数有误",
-			})
+			ReponseError(c, CodeInvalidParams)
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{
-			"msg": removeTopStruct(errs.Translate(trans)), //翻译错误
-		})
+		ReponseErrorwithMsg(c, CodeInvalidParams, removeTopStruct(errs.Translate(trans)))
 		return
 	}
 
@@ -44,15 +41,15 @@ func SignUpHandler(c *gin.Context) {
 	fmt.Println(p)
 	//2. 业务处理
 	if err := logic.SignUp(&p); err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"msg": "注册失败",
-		})
+		if errors.Is(err, mysql.ErrorUserExist){
+			ReponseError(c, CodeuserExist)
+			return
+		}
+		ReponseError(c, CodeServerBusy)
 		return
 	}
 	//3. 返回响应
-	c.JSON(http.StatusOK, gin.H{
-		"msg": "success",
-	})
+	ReponseSuccess(c, nil)
 }
 
 func LoginHandler(c *gin.Context){
@@ -65,27 +62,19 @@ func LoginHandler(c *gin.Context){
 		//判断err是不是validator.ValidationErrors类型
 		errs, ok := err.(validator.ValidationErrors)
 		if !ok {
-			c.JSON(http.StatusOK, gin.H{
-				"msg": "请求参数有误",
-			})
+			ReponseError(c, CodeInvalidParams)
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{
-			"msg": removeTopStruct(errs.Translate(trans)), //翻译错误
-		})
+		ReponseErrorwithMsg(c, CodeInvalidParams, removeTopStruct(errs.Translate(trans)))
 		return
 	}
 	//业务处理
 	if err := logic.Login(p); err!= nil{
 		zap.L().Error("login failed", zap.String("username", p.Username), zap.Error(err))
 
-		c.JSON(http.StatusOK, gin.H{
-		"msg": "用户名或密码错误",
-		})
+		ReponseError(c, CodeInvalidPassword)
 		return
 	}
 	//返回响应
-	c.JSON(http.StatusOK, gin.H{
-		"msg": "登陆成功",
-	})
+	ReponseSuccess(c, nil)
 }
