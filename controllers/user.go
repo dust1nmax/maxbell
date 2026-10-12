@@ -71,8 +71,11 @@ func LoginHandler(c *gin.Context){
 	//业务处理
 	if err := logic.Login(p); err!= nil{
 		zap.L().Error("login failed", zap.String("username", p.Username), zap.Error(err))
-
-		ReponseError(c, CodeInvalidPassword)
+		if errors.Is(err, mysql.ErrorUserNotExist){
+			ReponseError(c, CodeuserNotExist)
+			return
+		}
+		ReponseError(c, CodeServerBusy)
 		return
 	}
 	//返回响应
