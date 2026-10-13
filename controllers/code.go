@@ -9,6 +9,9 @@ const (
 	CodeuserNotExist
 	CodeInvalidPassword
 	CodeServerBusy
+
+	CodeNeedAuth
+	CodeInvaliToken
 )
 
 var codeMsgMap = map[Codemsg]string{
@@ -18,6 +21,9 @@ var codeMsgMap = map[Codemsg]string{
 	CodeuserNotExist:    "用户不存在",
 	CodeInvalidPassword: "用户名或密码错误",
 	CodeServerBusy:      "服务繁忙",
+
+	CodeNeedAuth:    "请求头中auth为空",
+	CodeInvaliToken: "无效的Token",
 }
 
 func (c Codemsg) Msg() string {
