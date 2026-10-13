@@ -41,7 +41,7 @@ func SignUpHandler(c *gin.Context) {
 	fmt.Println(p)
 	//2. 业务处理
 	if err := logic.SignUp(&p); err != nil {
-		if errors.Is(err, mysql.ErrorUserExist){
+		if errors.Is(err, mysql.ErrorUserExist) {
 			ReponseError(c, CodeuserExist)
 			return
 		}
@@ -52,10 +52,10 @@ func SignUpHandler(c *gin.Context) {
 	ReponseSuccess(c, nil)
 }
 
-func LoginHandler(c *gin.Context){
+func LoginHandler(c *gin.Context) {
 	//获取校验参数
 	p := new(models.ParamLogin)
-	if err:= c.ShouldBindJSON(p); err!= nil{
+	if err := c.ShouldBindJSON(p); err != nil {
 		//请求参数有误
 		zap.L().Error("login with invalid params", zap.Error(err))
 
@@ -69,9 +69,10 @@ func LoginHandler(c *gin.Context){
 		return
 	}
 	//业务处理
-	if err := logic.Login(p); err!= nil{
+	token, err:= logic.Login(p)
+	if err != nil {
 		zap.L().Error("login failed", zap.String("username", p.Username), zap.Error(err))
-		if errors.Is(err, mysql.ErrorUserNotExist){
+		if errors.Is(err, mysql.ErrorUserNotExist) {
 			ReponseError(c, CodeuserNotExist)
 			return
 		}
@@ -79,5 +80,5 @@ func LoginHandler(c *gin.Context){
 		return
 	}
 	//返回响应
-	ReponseSuccess(c, nil)
+	ReponseSuccess(c, token)
 }

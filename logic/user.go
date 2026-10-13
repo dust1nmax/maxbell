@@ -3,6 +3,7 @@ package logic
 import (
 	"maxbell/dao/mysql"
 	"maxbell/models"
+	"maxbell/pkg/jwt"
 	"maxbell/pkg/snowflake"
 )
 
@@ -24,11 +25,16 @@ func SignUp(p *models.ParamSignup) (err error) {
 	return mysql.InsertUser(&user)
 }
 
-func Login(p *models.ParamLogin) error {
+func Login(p *models.ParamLogin) (token string, err error) {
 	user := &models.User{
 
 		Username: p.Username,
 		Password: p.Password,
 	}
-	return mysql.Login(user)
+
+	if err := mysql.Login(user); err != nil {
+		return "", err
+	}
+
+	return jwt.GenToken(user.Userid, user.Username)
 }
