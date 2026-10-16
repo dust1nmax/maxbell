@@ -4,16 +4,10 @@ import (
 	"crypto/md5"
 	"database/sql"
 	"encoding/hex"
-	"errors"
 	"maxbell/models"
 )
 
 var secret = "max"
-var (
-	ErrorUserExist = errors.New("用户已存在")
-	ErrorUserNotExist = errors.New("用户不存在")
-	ErrorInvalidParams = errors.New("密码错误")
-)
 
 // 把每一步数据库操作封装成函数等到logic 层调用
 func QueryUserbyusername(username string) (err error) {
