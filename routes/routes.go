@@ -4,7 +4,6 @@ import (
 	"maxbell/controllers"
 	"maxbell/logger"
 	"maxbell/middlewares"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,14 +16,18 @@ func Setup(mode string) *gin.Engine {
 	r := gin.New()
 	r.Use(logger.Ginlogger(), logger.GinRecovery(true))
 
-	//注册业务路由
-	r.POST("/signup", controllers.SignUpHandler)
-	//登陆业务
-	r.POST("/login", controllers.LoginHandler)
+	v1:= r.Group("/api/v1")
 
-	r.GET("/ping", middlewares.JWTAuthMiddleware(), func(ctx *gin.Context) {
-		ctx.String(http.StatusOK, "ping")
-	})
+	//注册业务路由
+	v1.POST("/signup", controllers.SignUpHandler)
+	//登陆业务
+	v1.POST("/login", controllers.LoginHandler)
+
+	v1.Use(middlewares.JWTAuthMiddleware()) //应用JWT认证中间件
+
+	{
+		v1.GET("/community", controllers.CommunityHandler)
+	}
 
 	return r
 }

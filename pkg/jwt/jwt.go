@@ -7,7 +7,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-const TokenExpireDuration = time.Hour * 2
+const TokenExpireDuration = time.Hour * 24 * 365
 
 // CustomSecret 用于加盐的字符串
 // 加盐是在密码做哈希前拼上一段随机字符串，让相同密码每次存进数据库的哈希值都不同，从而防止彩虹表攻击
