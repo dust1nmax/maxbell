@@ -12,6 +12,7 @@ func CreatePostHandler(c *gin.Context) {
 	// 参数校验与处理
 	p := new(models.Post)
 	if err := c.ShouldBindJSON(p); err != nil {
+		zap.L().Error("c.ShouldBindJSON(p) failed", zap.Error(err))
 		ReponseError(c, CodeInvalidParams)
 		return
 	}
