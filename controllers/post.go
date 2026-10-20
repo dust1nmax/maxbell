@@ -3,11 +3,13 @@ package controllers
 import (
 	"maxbell/logic"
 	"maxbell/models"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
+// CreatePostHandler
 func CreatePostHandler(c *gin.Context) {
 	// 参数校验与处理
 	p := new(models.Post)
@@ -31,4 +33,26 @@ func CreatePostHandler(c *gin.Context) {
 	}
 	//返回响应
 	ReponseSuccess(c, CodeSuccess)
+}
+
+// GetPostHandler
+func GetPostHandler(c *gin.Context) {
+	// 获取参数 （url里的帖子id）
+	idstr := c.Param("id")
+	id, err := strconv.ParseInt(idstr, 10, 64)
+	if err != nil {
+		zap.L().Error("get post detial failed with invalid param ", zap.Error(err))
+		ReponseError(c, CodeInvalidParams)
+		return
+	}
+	// 通过id 取出帖子数据 （查数据库）
+	data, err := logic.GetPostDetial(id)
+	if err != nil {
+		zap.L().Error("logic.GetPostDetial failed", zap.Error(err))
+		ReponseError(c, CodeServerBusy)
+		return
+	}
+	// 返回响应
+	ReponseSuccess(c, data)
+
 }

@@ -13,3 +13,8 @@ func CreatePost(p *models.Post) (err error) {
 	return mysql.CreatePost(p)
 	// 返回
 }
+
+// GetPostDetial 根据帖子id查询数据
+func GetPostDetial(id int64) (data *models.Post, err error) {
+	return mysql.GetPostDetial(id)
+}
