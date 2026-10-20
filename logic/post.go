@@ -18,7 +18,7 @@ func CreatePost(p *models.Post) (err error) {
 
 // GetPostDetial 根据帖子id查询数据
 func GetPostDetial(id int64) (data *models.ApiPostDetail, err error) {
-	
+	// 根据id查询post
 	post, err := mysql.GetPostDetial(id)
 	if err != nil {
 		zap.L().Error("mysql.GetPostDetial(id) failed",
@@ -27,22 +27,25 @@ func GetPostDetial(id int64) (data *models.ApiPostDetail, err error) {
 		return
 	}
 
+	// 根据AuthorID查询username
 	user, err := mysql.GetNameById(post.AuthorID)
 	if err != nil {
-		zap.L().Error("mysql.GetNameById(id) failed",
+		zap.L().Error("mysql.GetNameById(post.AuthorID) failed",
 			zap.Int64("user_id", post.AuthorID),
 			zap.Error(err))
 		return
 	}
 
-	community, err := mysql.GetCommunityDetialbyid(id)
+	// 根据CommunityID查询community
+	community, err := mysql.GetCommunityDetialbyid(post.CommunityID)
 	if err != nil {
-		zap.L().Error("mysql.GetCommunityDetialbyid(id) failed",
+		zap.L().Error("mysql.GetCommunityDetialbyid(post.CommunityID) failed",
 			zap.Int64("community_id", post.CommunityID),
 			zap.Error(err))
 		return
 	}
 
+	// 拼接完整信息
 	data = &models.ApiPostDetail{
 		AuthorName:      user.Username,
 		Post:            post,
