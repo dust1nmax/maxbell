@@ -56,3 +56,21 @@ func GetPostHandler(c *gin.Context) {
 	ReponseSuccess(c, data)
 
 }
+
+// GetPostListHandler 获取帖子列表的接口
+func GetPostListHandler(c *gin.Context) {
+
+	page, size := GetPageInfo(c)
+
+	// 获取数据
+	datas, err := logic.GetPostList(page, size)
+	if err != nil {
+		zap.L().Error("logic.GetPostList() failed", zap.Error(err))
+		ReponseError(c, CodeServerBusy)
+		return
+	}
+	// 返回响应
+	ReponseSuccess(c, datas)
+}
+
+
