@@ -69,7 +69,7 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 	//业务处理
-	token, err:= logic.Login(p)
+	user, err := logic.Login(p)
 	if err != nil {
 		zap.L().Error("login failed", zap.String("username", p.Username), zap.Error(err))
 		if errors.Is(err, mysql.ErrorUserNotExist) {
@@ -80,5 +80,9 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 	//返回响应
-	ReponseSuccess(c, token)
+	ReponseSuccess(c, gin.H{
+		"user_id":  fmt.Sprintf("%d", user.Userid),  // 前段js 生成的id值大小为 1 << 2*53-1   而int64 是 1 << 2*63-1 所以需要在序类化时看成 string 类型
+		"username": user.Username,
+		"token":    user.Token,
+	})
 }
