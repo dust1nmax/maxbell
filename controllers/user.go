@@ -81,7 +81,7 @@ func LoginHandler(c *gin.Context) {
 	}
 	//返回响应
 	ReponseSuccess(c, gin.H{
-		"user_id":  fmt.Sprintf("%d", user.Userid),  // 前段js 生成的id值大小为 1 << 2*53-1   而int64 是 1 << 2*63-1 所以需要在序类化时看成 string 类型
+		"user_id":  fmt.Sprintf("%d", user.Userid),  // 前端js 生成的id值大小为 1 << 2*53-1   而int64 是 1 << 2*63-1 所以需要在序类化时看成 string 类型
 		"username": user.Username,
 		"token":    user.Token,
 	})
