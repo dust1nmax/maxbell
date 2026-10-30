@@ -33,6 +33,7 @@ func Setup(mode string) *gin.Engine {
 		v1.GET("/post/:id", controllers.GetPostHandler)
 		v1.GET("/posts/", controllers.GetPostListHandler)
 
+		v1.POST("/vote", controllers.PostVoteHandler)
 	}
 
 	return r

@@ -7,6 +7,11 @@ type ParamSignup struct {
 }
 
 type ParamLogin struct {
-	Username   string `json:"username" binding:"required"`
-	Password   string `json:"password" binding:"required"`
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+type ParamPostVoteData struct {
+	PostId    string `json:"post_id"   binding:"required"`
+	Direction int8   `json:"direction,string" binding:"oneof=-1 0 1"` //赞成票(1) 反对票(-1) 取消投票(0)
 }

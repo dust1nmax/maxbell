@@ -2,6 +2,7 @@ package logic
 
 import (
 	"maxbell/dao/mysql"
+	"maxbell/dao/redis"
 	"maxbell/models"
 	"maxbell/pkg/snowflake"
 
@@ -12,7 +13,12 @@ func CreatePost(p *models.Post) (err error) {
 	//生成post id
 	p.Id = snowflake.GenID()
 	// 存到数据库
-	return mysql.CreatePost(p)
+	err = mysql.CreatePost(p)
+	if err != nil {
+		return err
+	}
+	err = redis.CreatePost(p.Id)
+	return
 	// 返回
 }
 

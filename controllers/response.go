@@ -19,7 +19,7 @@ import (
 type ResponseData struct {
 	Code Codemsg `json:"code"`
 	Msg  any     `json:"msg"`
-	Data any     `json:"data"`
+	Data any     `json:"data,omitempty"`
 }
 
 func ReponseError(c *gin.Context, code Codemsg) {
