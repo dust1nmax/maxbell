@@ -1,5 +1,10 @@
 package models
 
+const (
+	OrderTime  = "time"
+	OrderScore = "score"
+)
+
 type ParamSignup struct {
 	Username   string `json:"username" binding:"required"`
 	Password   string `json:"password" binding:"required"`
@@ -14,4 +19,10 @@ type ParamLogin struct {
 type ParamPostVoteData struct {
 	PostId    string `json:"post_id"   binding:"required"`
 	Direction int8   `json:"direction,string" binding:"oneof=-1 0 1"` //赞成票(1) 反对票(-1) 取消投票(0)
+}
+
+type ParamPostList struct {
+	Page  int64  `form:"page"`
+	Size  int64  `form:"size"`
+	Order string `form:"order"`
 }
