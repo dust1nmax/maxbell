@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 type Post struct {
 	Title       string    `json:"title" db:"title" binging:"required"`
@@ -15,6 +17,7 @@ type Post struct {
 // ApiPostDetail 帖子详情接口
 type ApiPostDetail struct {
 	AuthorName string `json:"author_name"`
+	Votenum int64 `json:"vote_num"`
 	*Post
 	*CommunityDetail `json:"community"`
 }

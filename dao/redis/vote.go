@@ -35,6 +35,7 @@ const (
 
 var (
 	ErrVoteTimeExpire = errors.New("投票时间已过")
+	ErrVoteRepested   = errors.New("不能重复投票")
 )
 
 func CreatePost(postid int64) error {
@@ -66,6 +67,9 @@ func PostVote(userid, postid string, value float64) error {
 	//创建事务
 	pipeline := rdb.TxPipeline()
 	rawvalue := rdb.ZScore(GetKey(KeyPostVotedPrefix+postid), userid).Val()
+	if value == rawvalue {
+		return ErrVoteRepested
+	}
 	if value > rawvalue {
 		dir = 1
 	} else {
