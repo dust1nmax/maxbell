@@ -17,7 +17,7 @@ func CreatePost(p *models.Post) (err error) {
 	if err != nil {
 		return err
 	}
-	err = redis.CreatePost(p.Id)
+	err = redis.CreatePost(p.Id, p.CommunityID)
 	return
 	// 返回
 }
@@ -104,6 +104,58 @@ func GetPostList(page, size int64) (datas []*models.ApiPostDetail, err error) {
 func GetPostList2(p *models.ParamPostList) (datas []*models.ApiPostDetail, err error) {
 	ids, err := redis.GetPostIdsInOrder(p)
 	zap.L().Debug("redis.GetPostIdsInOrder(p)", zap.Any("ids", ids))
+	if err != nil {
+		return  	
+	}
+	if len(ids) == 0 {
+		return
+	}
+	posts, err := mysql.GetPostsByIds(ids)
+	if err != nil {
+		return
+	}
+
+	// 提前查好每篇帖子的投票数
+	Votedata, err :=redis.GetPostVote(ids)
+	if err != nil {
+		return nil, err
+	}
+
+	for idx, post := range posts {
+		// 根据AuthorID查询username
+		user, err := mysql.GetNameById(post.AuthorID)
+		if err != nil {
+			zap.L().Error("mysql.GetNameById(post.AuthorID) failed",
+				zap.Int64("user_id", post.AuthorID),
+				zap.Error(err))
+			continue
+		}
+
+		// 根据CommunityID查询community
+		community, err := mysql.GetCommunityDetialbyid(post.CommunityID)
+		if err != nil {
+			zap.L().Error("mysql.GetCommunityDetialbyid(post.CommunityID) failed",
+				zap.Int64("community_id", post.CommunityID),
+				zap.Error(err))
+			continue
+		}
+
+		// 拼接完整信息
+		data := &models.ApiPostDetail{
+			AuthorName:      user.Username,
+			Votenum: Votedata[idx],
+			Post:            post,
+			CommunityDetail: community,
+		}
+
+		datas = append(datas, data)
+	} 
+
+	return
+}
+
+func GetCommunityPostList(p *models.ParamCommunityPostList) (datas []*models.ApiPostDetail, err error) {
+	ids, err := redis.GetCommunityPostIdsInOrder(p)
 	if err != nil {
 		return  	
 	}

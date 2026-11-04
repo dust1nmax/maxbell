@@ -100,3 +100,34 @@ func GetPostListHandler2(c *gin.Context) {
 	// 返回响应
 	ReponseSuccess(c, datas)
 }
+
+// GetCommunityPostListHandler2 升级版
+// 根据前端传来的参数动态获取社区帖子列表 （创建时间或分数）
+func GetCommunityPostListHandler2(c *gin.Context) {
+	// 获取参数
+	p := models.ParamCommunityPostList{
+		ParamPostList: &models.ParamPostList{
+			Page:  1,
+			Size:  10,
+			Order: models.OrderTime,
+		},
+
+	}
+
+	if err := c.ShouldBindQuery(&p); err != nil {
+		zap.L().Error("c.GetCommunityPostListHandler2(&p) with invilad param", zap.Error(err))
+		ReponseError(c, CodeInvalidParams)
+		return
+	}
+	// 在redis 里查询 id 列表
+	// 根据id 列表在数据库里查询帖子
+	datas, err := logic.GetCommunityPostList(&p)
+	if err != nil {
+		zap.L().Error("logic.GetPostList() failed", zap.Error(err))
+		ReponseError(c, CodeServerBusy)
+		return
+	}
+
+	// 返回响应
+	ReponseSuccess(c, datas)
+}
